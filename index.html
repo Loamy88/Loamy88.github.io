@@ -131,21 +131,21 @@
 
   function animate() {
     requestAnimationFrame(animate);
-
+  
     /* steering input */
     if (keys['a']) steering = Math.min(steering + 0.0025, 0.1);
     else if (keys['d']) steering = Math.max(steering - 0.0025, -0.1);
     else steering *= 0.9;
-
+  
     /* wheel turns opposite of car turn */
     wheelGroup.rotation.z = steering * 8;
-
+  
     /* accelerate forward */
     if (keys['w']) {
       forwardSpeed += accelerationRate;
       forwardSpeed = Math.min(forwardSpeed, maxSpeed);
     }
-
+  
     /* braking and reverse */
     if (keys['s']) {
       if (forwardSpeed > 0) {
@@ -154,23 +154,25 @@
         forwardSpeed = reverseSpeed;
       }
     }
-
+  
     /* friction */
     if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
-
-    /* steering affects angle */
+  
+    /* steering changes angle */
     angle -= steering * forwardSpeed * 3;
-
+  
+    /* apply angle to camera */
     camera.rotation.y = angle;
-
-    /* apply movement based on facing direction */
-    const dx = Math.sin(angle) * forwardSpeed;
-    const dz = Math.cos(angle) * forwardSpeed;
+  
+    /* ✅ REVERSED DIRECTION: now camera moves in its facing direction */
+    const dx = -Math.sin(angle) * forwardSpeed;
+    const dz = -Math.cos(angle) * forwardSpeed;
     camera.position.x += dx;
     camera.position.z += dz;
-
+  
     renderer.render(scene, camera);
   }
+
 
   animate();
 </script>
