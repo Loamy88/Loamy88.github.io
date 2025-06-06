@@ -159,13 +159,13 @@
     if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
 
     /* steering affects angle */
-    angle -= steering * forwardSpeed * 3;
+    angle += steering * forwardSpeed * 3;
 
     camera.rotation.y = angle;
 
     /* apply movement based on facing direction */
-    const dx = Math.sin(angle) * forwardSpeed;
-    const dz = Math.cos(angle) * forwardSpeed;
+    const dx = -Math.sin(angle) * forwardSpeed;
+    const dz = -Math.cos(angle) * forwardSpeed;
     camera.position.x += dx;
     camera.position.z += dz;
 
