@@ -153,7 +153,7 @@
 
     if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
 
-    angle -= steering * forwardSpeed * 3;
+    angle += steering * forwardSpeed * 3;
     camera.rotation.y = angle;
 
     const dx = Math.sin(angle) * forwardSpeed;
