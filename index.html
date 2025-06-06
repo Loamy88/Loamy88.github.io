@@ -121,10 +121,10 @@
   let forwardSpeed = 0;
   let steering = 0;
   const keys = {};
-  const maxSpeed = 0.45;
-  const accelerationRate = 0.0045;
-  const reverseSpeed = -0.2;
-  const decelerationRate = 0.02;
+  const maxSpeed = 0.5;
+  const accelerationRate = 0.0055;
+  const reverseSpeed = -0.25;
+  const decelerationRate = 0.025;
 
   window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
   window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
@@ -133,8 +133,8 @@
     requestAnimationFrame(animate);
 
     /* steering input */
-    if (keys['a']) steering = Math.min(steering + 0.0025, 0.1);
-    else if (keys['d']) steering = Math.max(steering - 0.0025, -0.1);
+    if (keys['a']) steering = Math.min(steering + 0.002, 0.1);
+    else if (keys['d']) steering = Math.max(steering - 0.002, -0.1);
     else steering *= 0.9;
 
     /* wheel turns opposite of car turn */
@@ -159,7 +159,7 @@
     if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
 
     /* steering affects angle */
-    angle += steering * forwardSpeed * 3;
+    angle += steering * forwardSpeed * 2;
 
     camera.rotation.y = angle;
 
