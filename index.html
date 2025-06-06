@@ -39,16 +39,13 @@
   /* cockpit */
   const cockpit = new THREE.Group();
 
-  /* dashboard */
   const dashGeo = new THREE.BoxGeometry(2.5, 0.5, 1);
   const dashMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
   const dashboard = new THREE.Mesh(dashGeo, dashMat);
-  dashboard.position.set(0, -0.6, 1.5);
+  dashboard.position.set(0, -0.6, -1.5);
   cockpit.add(dashboard);
 
-  /* steering wheel */
   const wheelGroup = new THREE.Group();
-
   const wheelGeometry = new THREE.TorusGeometry(0.4, 0.05, 16, 100);
   const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
   const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
@@ -65,16 +62,14 @@
   centerMesh.rotation.x = Math.PI / 2;
   wheelGroup.add(centerMesh);
 
-  wheelGroup.position.set(0, -0.3, 0.6);
+  wheelGroup.position.set(0, -0.3, -0.6);
   cockpit.add(wheelGroup);
 
-  /* window frame */
   const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
   const frameThickness = 0.1;
   const frameWidth = 3.5;
   const frameHeight = 2;
-
-  const frameZ = 1.1;
+  const frameZ = -1.1;
 
   const topFrame = new THREE.Mesh(new THREE.BoxGeometry(frameWidth, frameThickness, frameThickness), frameMaterial);
   topFrame.position.set(0, frameHeight / 2, frameZ);
@@ -92,7 +87,6 @@
   rightFrame.position.set(frameWidth / 2 - frameThickness / 2, 0, frameZ);
   cockpit.add(rightFrame);
 
-  /* overlay */
   const overlay = document.createElement('div');
   overlay.style.position = 'absolute';
   overlay.style.top = 0;
@@ -112,36 +106,37 @@
   scene.add(camera);
 
   /* movement */
-  let speed = 0;
   let angle = 0;
   let steering = 0;
+  let speed = 0;
+  let keys = {};
 
-  const maxSpeed = 0.25;
-  const accel = 0.005;
-  const decel = 0.02;
-  const reverseSpeed = -0.1;
+  const maxForwardSpeed = 0.3;
+  const acceleration = 0.004;
+  const braking = 0.005;
+  const reverseSpeed = -0.15;
+  const friction = 0.98;
 
-  const keys = {};
   window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
   window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
   function animate() {
     requestAnimationFrame(animate);
 
-    if (keys['a']) steering = Math.max(steering - 0.002, -0.1);
-    else if (keys['d']) steering = Math.min(steering + 0.002, 0.1);
+    if (keys['a']) steering += 0.0015;
+    else if (keys['d']) steering -= 0.0015;
     else steering *= 0.9;
 
     if (keys['w']) {
-      speed = Math.min(speed + accel, maxSpeed);
+      if (speed < maxForwardSpeed) speed += acceleration;
     } else if (keys['s']) {
-      if (speed > 0) speed = Math.max(speed - decel, 0);
+      if (speed > 0) speed -= braking;
       else speed = reverseSpeed;
     } else {
-      speed *= 0.98;
+      speed *= friction;
     }
 
-    angle -= steering * speed * 3;
+    angle += steering * speed * 3;
     camera.rotation.y = angle;
 
     const dx = Math.sin(angle) * speed;
@@ -149,7 +144,7 @@
     camera.position.x += dx;
     camera.position.z += dz;
 
-    wheelGroup.rotation.z = steering * 8;
+    wheelGroup.rotation.z = steering * 10; /* turn more, realistic */
 
     renderer.render(scene, camera);
   }
