@@ -130,19 +130,19 @@
 
   function animate() {
     requestAnimationFrame(animate);
-
+  
     if (keys['a']) steering = Math.min(steering + 0.0025, 0.1);
     else if (keys['d']) steering = Math.max(steering - 0.0025, -0.1);
     else steering *= 0.9;
-
+  
     /* wheel turns more and in reverse */
     wheelGroup.rotation.z = -steering * 8;
-
+  
     if (keys['w']) {
       forwardSpeed += accelerationRate;
       forwardSpeed = Math.min(forwardSpeed, maxSpeed);
     }
-
+  
     if (keys['s']) {
       if (forwardSpeed > 0) {
         forwardSpeed -= decelerationRate;
@@ -150,10 +150,25 @@
         forwardSpeed = reverseSpeed;
       }
     }
+  
+    if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
+  
+    /* ✅ reverse turning direction */
+    angle += steering * forwardSpeed * 3;
+    camera.rotation.y = angle;
+  
+    const dx = Math.sin(angle) * forwardSpeed;
+    const dz = Math.cos(angle) * forwardSpeed;
+    camera.position.x += dx;
+    camera.position.z += dz;
+  
+    renderer.render(scene, camera);
+  }
+
 
     if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
 
-    angle += steering * forwardSpeed * 3;
+    angle -= steering * forwardSpeed * 3;
     camera.rotation.y = angle;
 
     const dx = Math.sin(angle) * forwardSpeed;
