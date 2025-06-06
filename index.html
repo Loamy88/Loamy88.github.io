@@ -15,7 +15,7 @@
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xa0c4ff);
 
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -43,51 +43,56 @@
   const dashGeo = new THREE.BoxGeometry(2.5, 0.5, 1);
   const dashMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
   const dashboard = new THREE.Mesh(dashGeo, dashMat);
-  dashboard.position.set(0, -0.6, -1.5);
+  dashboard.position.set(0, -0.6, 1.5);
   cockpit.add(dashboard);
 
   /* steering wheel */
   const wheelGroup = new THREE.Group();
+
   const wheelGeometry = new THREE.TorusGeometry(0.4, 0.05, 16, 100);
   const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
   const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
   wheel.rotation.y = Math.PI;
   wheelGroup.add(wheel);
 
-  const spokeGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.4, 12);
-  const spoke = new THREE.Mesh(spokeGeo, wheelMaterial);
-  spoke.rotation.z = Math.PI / 2;
-  wheelGroup.add(spoke);
+  const wheelSpokesGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.4, 12);
+  const spoke1 = new THREE.Mesh(wheelSpokesGeo, wheelMaterial);
+  spoke1.rotation.z = Math.PI / 2;
+  wheelGroup.add(spoke1);
 
   const center = new THREE.CylinderGeometry(0.1, 0.1, 0.05, 32);
   const centerMesh = new THREE.Mesh(center, new THREE.MeshStandardMaterial({ color: 0x888888 }));
   centerMesh.rotation.x = Math.PI / 2;
   wheelGroup.add(centerMesh);
 
-  wheelGroup.position.set(0, -0.3, -0.6);
+  wheelGroup.position.set(0, -0.3, 0.6);
   cockpit.add(wheelGroup);
 
   /* window frame */
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-  const frameT = 0.1, frameW = 3.5, frameH = 2, frameZ = -1.1;
+  const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+  const frameThickness = 0.1;
+  const frameWidth = 3.5;
+  const frameHeight = 2;
 
-  const topFrame = new THREE.Mesh(new THREE.BoxGeometry(frameW, frameT, frameT), frameMat);
-  topFrame.position.set(0, frameH / 2, frameZ);
+  const frameZ = 1.1;
+
+  const topFrame = new THREE.Mesh(new THREE.BoxGeometry(frameWidth, frameThickness, frameThickness), frameMaterial);
+  topFrame.position.set(0, frameHeight / 2, frameZ);
   cockpit.add(topFrame);
 
-  const bottomFrame = new THREE.Mesh(new THREE.BoxGeometry(frameW, frameT, frameT), frameMat);
-  bottomFrame.position.set(0, -frameH / 2, frameZ);
+  const bottomFrame = new THREE.Mesh(new THREE.BoxGeometry(frameWidth, frameThickness, frameThickness), frameMaterial);
+  bottomFrame.position.set(0, -frameHeight / 2, frameZ);
   cockpit.add(bottomFrame);
 
-  const leftFrame = new THREE.Mesh(new THREE.BoxGeometry(frameT, frameH, frameT), frameMat);
-  leftFrame.position.set(-frameW / 2 + frameT / 2, 0, frameZ);
+  const leftFrame = new THREE.Mesh(new THREE.BoxGeometry(frameThickness, frameHeight, frameThickness), frameMaterial);
+  leftFrame.position.set(-frameWidth / 2 + frameThickness / 2, 0, frameZ);
   cockpit.add(leftFrame);
 
-  const rightFrame = new THREE.Mesh(new THREE.BoxGeometry(frameT, frameH, frameT), frameMat);
-  rightFrame.position.set(frameW / 2 - frameT / 2, 0, frameZ);
+  const rightFrame = new THREE.Mesh(new THREE.BoxGeometry(frameThickness, frameHeight, frameThickness), frameMaterial);
+  rightFrame.position.set(frameWidth / 2 - frameThickness / 2, 0, frameZ);
   cockpit.add(rightFrame);
 
-  /* overlay arc */
+  /* overlay */
   const overlay = document.createElement('div');
   overlay.style.position = 'absolute';
   overlay.style.top = 0;
@@ -98,7 +103,7 @@
   overlay.style.zIndex = 10;
   overlay.innerHTML = `
     <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,0 Q50,80 100,0" fill="black" opacity="0.4" transform="translate(0,0) scale(${window.innerWidth / 100}, 1)"/>
+      <path d="M0,0 Q50,80 100,0" fill="black" opacity="0.4" transform="translate(0,0) scale(${window.innerWidth/100}, 1)"/>
     </svg>`;
   document.body.appendChild(overlay);
 
@@ -106,75 +111,45 @@
   camera.position.set(0, 1.5, 0);
   scene.add(camera);
 
-  /* obstacles */
-  const obstacleGeo = new THREE.BoxGeometry(1, 2, 1);
-  const obstacleMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
-  for (let i = 0; i < 50; i++) {
-    const obs = new THREE.Mesh(obstacleGeo, obstacleMat);
-    obs.position.set((Math.random() - 0.5) * 300, 1, (Math.random() - 0.5) * 300);
-    scene.add(obs);
-  }
-
   /* movement */
+  let speed = 0;
   let angle = 0;
-  let forwardSpeed = 0;
   let steering = 0;
-  const keys = {};
-  const maxSpeed = 0.45;
-  const accelerationRate = 0.0045;
-  const reverseSpeed = -0.2;
-  const decelerationRate = 0.02;
 
+  const maxSpeed = 0.25;
+  const accel = 0.005;
+  const decel = 0.02;
+  const reverseSpeed = -0.1;
+
+  const keys = {};
   window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
   window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
   function animate() {
     requestAnimationFrame(animate);
-  
-    if (keys['a']) steering = Math.min(steering + 0.0025, 0.1);
-    else if (keys['d']) steering = Math.max(steering - 0.0025, -0.1);
+
+    if (keys['a']) steering = Math.max(steering - 0.002, -0.1);
+    else if (keys['d']) steering = Math.min(steering + 0.002, 0.1);
     else steering *= 0.9;
-  
-    /* wheel turns more and in reverse */
-    wheelGroup.rotation.z = -steering * 8;
-  
+
     if (keys['w']) {
-      forwardSpeed += accelerationRate;
-      forwardSpeed = Math.min(forwardSpeed, maxSpeed);
+      speed = Math.min(speed + accel, maxSpeed);
+    } else if (keys['s']) {
+      if (speed > 0) speed = Math.max(speed - decel, 0);
+      else speed = reverseSpeed;
+    } else {
+      speed *= 0.98;
     }
-  
-    if (keys['s']) {
-      if (forwardSpeed > 0) {
-        forwardSpeed -= decelerationRate;
-      } else {
-        forwardSpeed = reverseSpeed;
-      }
-    }
-  
-    if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
-  
-    /* ✅ reverse turning direction */
-    angle += steering * forwardSpeed * 3;
-    camera.rotation.y = angle;
-  
-    const dx = Math.sin(angle) * forwardSpeed;
-    const dz = Math.cos(angle) * forwardSpeed;
-    camera.position.x += dx;
-    camera.position.z += dz;
-  
-    renderer.render(scene, camera);
-  }
 
-
-    if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
-
-    angle -= steering * forwardSpeed * 3;
+    angle -= steering * speed * 3;
     camera.rotation.y = angle;
 
-    const dx = Math.sin(angle) * forwardSpeed;
-    const dz = Math.cos(angle) * forwardSpeed;
+    const dx = Math.sin(angle) * speed;
+    const dz = Math.cos(angle) * speed;
     camera.position.x += dx;
     camera.position.z += dz;
+
+    wheelGroup.rotation.z = steering * 8;
 
     renderer.render(scene, camera);
   }
