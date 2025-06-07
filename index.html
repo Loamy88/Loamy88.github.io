@@ -121,15 +121,16 @@
   let forwardSpeed = 0;
   let steering = 0;
   const keys = {};
-  const maxSpeed = 0.2;
-  const accelerationRate = 0.002;
-  const reverseSpeed = -0.08;
-  const decelerationRate = 0.015;
+  const maxSpeed = 0.45;
+  const accelerationRate = 0.0045;
+  const reverseSpeed = -0.2;
+  const decelerationRate = 0.02;
 
   window.addEventListener('keydown', e => {
     keys[e.key.toLowerCase()] = true;
     if (e.key === 'Shift') keys['shift'] = true;
   });
+
   window.addEventListener('keyup', e => {
     keys[e.key.toLowerCase()] = false;
     if (e.key === 'Shift') keys['shift'] = false;
@@ -154,8 +155,11 @@
 
     /* braking and reverse */
     if (keys['s']) {
-      forwardSpeed -= accelerationRate * 0.5;
-      forwardSpeed = Math.max(forwardSpeed, reverseSpeed);
+      if (forwardSpeed > 0) {
+        forwardSpeed -= decelerationRate;
+      } else {
+        forwardSpeed = reverseSpeed;
+      }
     }
 
     /* friction */
@@ -163,14 +167,18 @@
       forwardSpeed *= keys['shift'] ? 0.99 : 0.97;
     }
 
-    /* turning (drift multiplier) */
-    const driftMultiplier = keys['shift'] ? 6 : 3;
-    angle += steering * forwardSpeed * driftMultiplier;
+    /* turning angle (drift increases multiplier) */
+    const driftTurnMultiplier = keys['shift'] ? 6 : 3;
+    angle += steering * forwardSpeed * driftTurnMultiplier;
+
     camera.rotation.y = angle;
 
-    /* movement */
-    const dx = -Math.sin(angle) * forwardSpeed;
-    const dz = -Math.cos(angle) * forwardSpeed;
+    /* movement: forward + drift sideways if shift */
+    const driftSide = keys['shift'] ? steering * forwardSpeed * 2 : 0;
+
+    const dx = -Math.sin(angle) * forwardSpeed + Math.cos(angle) * driftSide;
+    const dz = -Math.cos(angle) * forwardSpeed - Math.sin(angle) * driftSide;
+
     camera.position.x += dx;
     camera.position.z += dz;
 
