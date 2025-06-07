@@ -15,7 +15,7 @@ class CarControls {
     this.topMax = 0.5;
     this.accelerationRate = 0.0055;
     this.maxReverseSpeed = -0.30;
-    this.reverseAcceleration = 0.005;
+    this.reverseAcceleration = 0.006;
     this.keys = {};
     window.addEventListener('keydown', e => this.keys[e.key.toLowerCase()] = true);
     window.addEventListener('keyup', e => this.keys[e.key.toLowerCase()] = false);
@@ -25,8 +25,8 @@ class CarControls {
     // Input handling and car movement logic as per your original
     // Animate steering wheel
     const wheelGroup = this.cockpit.userData.wheelGroup;
-    if (this.keys['a']) this.steering = Math.min(this.steering + 0.002, 0.1);
-    else if (this.keys['d']) this.steering = Math.max(this.steering - 0.002, -0.1);
+    if (this.keys['a']) this.steering = Math.min(this.steering + 0.003, 0.12);
+    else if (this.keys['d']) this.steering = Math.max(this.steering - 0.003, -0.12);
     else this.steering *= 0.9;
     if (wheelGroup) wheelGroup.rotation.z = this.steering * 8;
 
@@ -41,9 +41,9 @@ class CarControls {
     if (!this.keys['w'] && !this.keys['s']) this.forwardSpeed *= 0.97;
     this.angle += this.steering * this.forwardSpeed * 2;
 
-    if (Math.abs(this.steering) > 0.06) {
-      this.driftX += Math.cos(this.angle) * this.steering * this.forwardSpeed * 3;
-      this.driftZ += -Math.sin(this.angle) * this.steering * this.forwardSpeed * 3;
+    if (Math.abs(this.steering) > 0.05) {
+      this.driftX += Math.cos(this.angle) * this.steering * this.forwardSpeed * 4;
+      this.driftZ += -Math.sin(this.angle) * this.steering * this.forwardSpeed * 4;
     }
     this.driftX *= 0.9;
     this.driftZ *= 0.9;
