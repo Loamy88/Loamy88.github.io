@@ -1,13 +1,6 @@
-// Build cockpit interior and return as a THREE.Group
+// Only create and return the steering wheel group
 function createCockpit() {
   const cockpit = new THREE.Group();
-
-  // Dashboard
-  const dashGeo = new THREE.BoxGeometry(2.5, 0.5, 1);
-  const dashMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-  const dashboard = new THREE.Mesh(dashGeo, dashMat);
-  dashboard.position.set(0, -0.6, -1.5);
-  cockpit.add(dashboard);
 
   // Steering wheel
   const wheelGroup = new THREE.Group();
@@ -27,24 +20,9 @@ function createCockpit() {
   centerMesh.rotation.x = Math.PI / 2;
   wheelGroup.add(centerMesh);
 
+  // Position the wheel; adjust as needed for your model
   wheelGroup.position.set(0, -0.3, -0.6);
   cockpit.add(wheelGroup);
-
-  // Window frame
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-  const frameT = 0.1, frameW = 3.5, frameH = 2, frameZ = -1.1;
-  const topFrame = new THREE.Mesh(new THREE.BoxGeometry(frameW, frameT, frameT), frameMat);
-  topFrame.position.set(0, frameH / 2, frameZ);
-  cockpit.add(topFrame);
-  const bottomFrame = new THREE.Mesh(new THREE.BoxGeometry(frameW, frameT, frameT), frameMat);
-  bottomFrame.position.set(0, -frameH / 2, frameZ);
-  cockpit.add(bottomFrame);
-  const leftFrame = new THREE.Mesh(new THREE.BoxGeometry(frameT, frameH, frameT), frameMat);
-  leftFrame.position.set(-frameW / 2 + frameT / 2, 0, frameZ);
-  cockpit.add(leftFrame);
-  const rightFrame = new THREE.Mesh(new THREE.BoxGeometry(frameT, frameH, frameT), frameMat);
-  rightFrame.position.set(frameW / 2 - frameT / 2, 0, frameZ);
-  cockpit.add(rightFrame);
 
   cockpit.userData.wheelGroup = wheelGroup; // for steering animation
   return cockpit;
