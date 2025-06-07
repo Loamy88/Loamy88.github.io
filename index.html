@@ -121,24 +121,30 @@
   let forwardSpeed = 0;
   let steering = 0;
   const keys = {};
-  const maxSpeed = 0.5;
-  const accelerationRate = 0.0055;
-  const reverseSpeed = -0.25;
-  const decelerationRate = 0.025;
+  const maxSpeed = 0.2;
+  const accelerationRate = 0.002;
+  const reverseSpeed = -0.08;
+  const decelerationRate = 0.015;
 
-  window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-  window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+  window.addEventListener('keydown', e => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === 'Shift') keys['shift'] = true;
+  });
+  window.addEventListener('keyup', e => {
+    keys[e.key.toLowerCase()] = false;
+    if (e.key === 'Shift') keys['shift'] = false;
+  });
 
   function animate() {
     requestAnimationFrame(animate);
 
     /* steering input */
-    if (keys['a']) steering = Math.min(steering + 0.002, 0.1);
-    else if (keys['d']) steering = Math.max(steering - 0.002, -0.1);
+    if (keys['a']) steering = Math.max(steering - 0.005, -0.15);
+    else if (keys['d']) steering = Math.min(steering + 0.005, 0.15);
     else steering *= 0.9;
 
     /* wheel turns opposite of car turn */
-    wheelGroup.rotation.z = steering * 8;
+    wheelGroup.rotation.z = -steering * 8;
 
     /* accelerate forward */
     if (keys['w']) {
@@ -148,22 +154,21 @@
 
     /* braking and reverse */
     if (keys['s']) {
-      if (forwardSpeed > 0) {
-        forwardSpeed -= decelerationRate;
-      } else {
-        forwardSpeed = reverseSpeed;
-      }
+      forwardSpeed -= accelerationRate * 0.5;
+      forwardSpeed = Math.max(forwardSpeed, reverseSpeed);
     }
 
     /* friction */
-    if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
+    if (!keys['w'] && !keys['s']) {
+      forwardSpeed *= keys['shift'] ? 0.99 : 0.97;
+    }
 
-    /* steering affects angle */
-    angle += steering * forwardSpeed * 2;
-
+    /* turning (drift multiplier) */
+    const driftMultiplier = keys['shift'] ? 6 : 3;
+    angle += steering * forwardSpeed * driftMultiplier;
     camera.rotation.y = angle;
 
-    /* apply movement based on facing direction */
+    /* movement */
     const dx = -Math.sin(angle) * forwardSpeed;
     const dz = -Math.cos(angle) * forwardSpeed;
     camera.position.x += dx;
