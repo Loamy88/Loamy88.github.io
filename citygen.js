@@ -22,9 +22,9 @@ function randomGreen() {
  * @returns {THREE.Group} City group
  */
 function generateCityGrid({
-  gridSize = 8,
-  cellSize = 8,
-  roadWidth = 2,
+  gridSize = 16,
+  cellSize = 25,
+  roadWidth = 6,
   fieldChance = 0.12,
   missingRoadChance = 0.18,
   startBlock = new THREE.Vector2(0, 0),
@@ -96,10 +96,9 @@ function generateCityGrid({
         maxZ += shrink;
       }
 
-      // Building height
-      const height = buildingColors[y][x].type === "field"
-        ? 0.2 + Math.random()*0.4
-        : 2 + Math.random()*2;
+      // Building height: fields are almost flat
+      const isField = buildingColors[y][x].type === "field";
+      const height = isField ? 0.01 : 2 + Math.random() * 2;
 
       // Place mesh
       const mesh = new THREE.Mesh(
