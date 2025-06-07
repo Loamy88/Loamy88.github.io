@@ -151,7 +151,9 @@
   let steering = 0;
   let driftX = 0, driftZ = 0;
   const keys = {};
-  const maxSpeed = 0.5;
+  let maxSpeed = 0.35; // default base
+  const baseMax = 0.35;
+  const topMax = 0.5;
   const accelerationRate = 0.0055;
   const maxReverseSpeed = -0.30; // slower reverse
   const reverseAcceleration = 0.005;
@@ -221,6 +223,17 @@
       camera.position.z = nextZ;
     }
 
+    // Adjust max speed based on steering
+    const turnAmount = Math.abs(steering);
+    if (turnAmount < 0.01) {
+      maxSpeed += 0.001;
+      maxSpeed = Math.min(maxSpeed, topMax);
+    } else {
+      const slowdown = turnAmount * 2; // the more turning, the more slowdown
+      maxSpeed = Math.max(baseMax, topMax - slowdown);
+    }
+
+
     let blocked = false;
 
     for (const obs of obstacles) {
@@ -256,9 +269,37 @@
     updateSpeedometer();
     renderer.render(scene, camera);
 
-    // Add trail
-    const trail = new THREE.Mesh(trailGeo, trailMaterial.clone());
-    trail.position.set(camera.position.x, 0.05, camera.position.z);
+    const trailLeft = new THREE.Mesh(trailGeo, trailMaterial.clone());
+    const trailRight = new THREE.Mesh(trailGeo, trailMaterial.clone());
+    
+    const backOffset = -1.2;  // behind car
+    const sideOffset = 0.5;   // left/right tires
+    
+    const sin = Math.sin(angle);
+    const cos = Math.cos(angle);
+    
+    // Left tire position
+    trailLeft.position.set(
+      camera.position.x + cos * backOffset + sin * sideOffset,
+      0.05,
+      camera.position.z + sin * backOffset - cos * sideOffset
+    );
+    
+    // Right tire position
+    trailRight.position.set(
+      camera.position.x + cos * backOffset - sin * sideOffset,
+      0.05,
+      camera.position.z + sin * backOffset + cos * sideOffset
+    );
+    
+    trailLeft.material.opacity = 0.7;
+    trailLeft.material.transparent = true;
+    trailRight.material.opacity = 0.7;
+    trailRight.material.transparent = true;
+    
+    trailGroup.add(trailLeft);
+    trailGroup.add(trailRight);
+
     trail.material.opacity = 0.7;
     trail.material.transparent = true;
     trailGroup.add(trail);
