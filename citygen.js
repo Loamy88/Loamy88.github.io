@@ -22,8 +22,8 @@ function randomGreen() {
  * @returns {THREE.Group} City group
  */
 function generateCityGrid({
-  gridSize = 16,
-  cellSize = 40,
+  gridSize = 10,
+  cellSize = 25,
   roadWidth = 6,
   fieldChance = 0.12,
   missingRoadChance = 0.18,
