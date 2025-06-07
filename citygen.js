@@ -23,7 +23,7 @@ function randomGreen() {
  */
 function generateCityGrid({
   gridSize = 16,
-  cellSize = 25,
+  cellSize = 40,
   roadWidth = 6,
   fieldChance = 0.12,
   missingRoadChance = 0.18,
