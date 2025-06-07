@@ -1,4 +1,4 @@
-// Only create and return the steering wheel group
+// Build steering wheel only (for use inside GLB car model)
 function createCockpit() {
   const cockpit = new THREE.Group();
 
@@ -20,7 +20,7 @@ function createCockpit() {
   centerMesh.rotation.x = Math.PI / 2;
   wheelGroup.add(centerMesh);
 
-  // Position the wheel; adjust as needed for your model
+  // Adjust position to fit your car model!
   wheelGroup.position.set(0, -0.3, -0.6);
   cockpit.add(wheelGroup);
 
