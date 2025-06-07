@@ -121,31 +121,24 @@
   let forwardSpeed = 0;
   let steering = 0;
   const keys = {};
-  const maxSpeed = 0.45;
-  const accelerationRate = 0.0045;
-  const reverseSpeed = -0.2;
-  const decelerationRate = 0.02;
+  const maxSpeed = 0.5;
+  const accelerationRate = 0.0055;
+  const reverseSpeed = -0.25;
+  const decelerationRate = 0.025;
 
-  window.addEventListener('keydown', e => {
-    keys[e.key.toLowerCase()] = true;
-    if (e.key === 'Shift') keys['shift'] = true;
-  });
-
-  window.addEventListener('keyup', e => {
-    keys[e.key.toLowerCase()] = false;
-    if (e.key === 'Shift') keys['shift'] = false;
-  });
+  window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+  window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
   function animate() {
     requestAnimationFrame(animate);
 
     /* steering input */
-    if (keys['a']) steering = Math.max(steering - 0.005, -0.15);
-    else if (keys['d']) steering = Math.min(steering + 0.005, 0.15);
+    if (keys['a']) steering = Math.min(steering + 0.002, 0.1);
+    else if (keys['d']) steering = Math.max(steering - 0.002, -0.1);
     else steering *= 0.9;
 
     /* wheel turns opposite of car turn */
-    wheelGroup.rotation.z = -steering * 8;
+    wheelGroup.rotation.z = steering * 8;
 
     /* accelerate forward */
     if (keys['w']) {
@@ -163,22 +156,16 @@
     }
 
     /* friction */
-    if (!keys['w'] && !keys['s']) {
-      forwardSpeed *= keys['shift'] ? 0.99 : 0.97;
-    }
+    if (!keys['w'] && !keys['s']) forwardSpeed *= 0.97;
 
-    /* turning angle (drift increases multiplier) */
-    const driftTurnMultiplier = keys['shift'] ? 6 : 3;
-    angle += steering * forwardSpeed * driftTurnMultiplier;
+    /* steering affects angle */
+    angle += steering * forwardSpeed * 2;
 
     camera.rotation.y = angle;
 
-    /* movement: forward + drift sideways if shift */
-    const driftSide = keys['shift'] ? steering * forwardSpeed * 2 : 0;
-
-    const dx = -Math.sin(angle) * forwardSpeed + Math.cos(angle) * driftSide;
-    const dz = -Math.cos(angle) * forwardSpeed - Math.sin(angle) * driftSide;
-
+    /* apply movement based on facing direction */
+    const dx = -Math.sin(angle) * forwardSpeed;
+    const dz = -Math.cos(angle) * forwardSpeed;
     camera.position.x += dx;
     camera.position.z += dz;
 
