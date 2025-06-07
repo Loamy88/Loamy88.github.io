@@ -28,6 +28,15 @@ const trailGeo = new THREE.SphereGeometry(0.05, 6, 6);
 const trailGroup = new THREE.Group();
 scene.add(trailGroup);
 
+// Add a green base plane beneath the city to cover any gaps
+const baseSize = gridSize * cellSize + 200; // Make it larger than your city for margin
+const baseGeo = new THREE.PlaneGeometry(baseSize, baseSize);
+const baseMat = new THREE.MeshStandardMaterial({ color: 0x337733 });
+const basePlane = new THREE.Mesh(baseGeo, baseMat);
+basePlane.rotation.x = -Math.PI / 2;
+basePlane.position.y = -1; // slightly below y=0
+scene.add(basePlane);
+
 // Generate city grid
 const city = generateCityGrid({
   gridSize: 8,
