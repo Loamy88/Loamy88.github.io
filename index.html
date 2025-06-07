@@ -21,6 +21,17 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
+  // mini map
+  const miniCam = new THREE.OrthographicCamera(-50, 50, 50, -50, 1, 1000);
+  miniCam.position.set(0, 100, 0);
+  miniCam.lookAt(0, 0, 0);
+
+  // trail
+  const trailMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const trailGeo = new THREE.SphereGeometry(0.05, 6, 6);
+  const trailGroup = new THREE.Group();
+  scene.add(trailGroup);
+
   /* lighting */
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
   hemiLight.position.set(0, 20, 0);
@@ -39,6 +50,10 @@
 
   /* cockpit */
   const cockpit = new THREE.Group();
+
+  // car body
+  const carBody = new THREE.Object3D();
+  scene.add(carBody);
 
   /* dashboard */
   const dashGeo = new THREE.BoxGeometry(2.5, 0.5, 1);
@@ -149,6 +164,20 @@
     speedometer.textContent = `Speed: ${(forwardSpeed * 100).toFixed(0)}`;
   }
 
+  function checkCollision(x, z) {
+    const size = 0.6;
+    for (const obs of obstacles) {
+      const dx = x - obs.position.x;
+      const dz = z - obs.position.z;
+      if (Math.abs(dx) < size + 0.5 && Math.abs(dz) < size + 0.5) {
+        const sideHit = Math.abs(Math.cos(angle)) < 0.5;
+        forwardSpeed = sideHit ? -forwardSpeed * 0.6 : -forwardSpeed * 0.3;
+        return true;
+      }
+    }
+    return false;
+  }
+
   function animate() {
     requestAnimationFrame(animate);
 
@@ -181,11 +210,16 @@
     driftX *= 0.9;
     driftZ *= 0.9;
 
-    const dx = -Math.sin(angle) * forwardSpeed + driftX;
-    const dz = -Math.cos(angle) * forwardSpeed + driftZ;
-
-    let nextX = camera.position.x + dx;
-    let nextZ = camera.position.z + dz;
+    const dx = -Math.sin(angle) * forwardSpeed;
+    const dz = -Math.cos(angle) * forwardSpeed;
+    
+    const nextX = camera.position.x + dx;
+    const nextZ = camera.position.z + dz;
+    
+    if (!checkCollision(nextX, nextZ)) {
+      camera.position.x = nextX;
+      camera.position.z = nextZ;
+    }
 
     let blocked = false;
 
@@ -221,6 +255,34 @@
     camera.rotation.y = angle;
     updateSpeedometer();
     renderer.render(scene, camera);
+
+    // Add trail
+    const trail = new THREE.Mesh(trailGeo, trailMaterial.clone());
+    trail.position.set(camera.position.x, 0.05, camera.position.z);
+    trail.material.opacity = 0.7;
+    trail.material.transparent = true;
+    trailGroup.add(trail);
+    
+    // Fade and remove trail
+    trailGroup.children.forEach(child => {
+      child.material.opacity -= 0.01;
+      if (child.material.opacity <= 0) trailGroup.remove(child);
+    });
+    
+    // Update minimap position
+    miniCam.position.set(camera.position.x, 100, camera.position.z);
+    miniCam.lookAt(camera.position.x, 0, camera.position.z);
+    
+    // Main view
+    renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+    renderer.render(scene, camera);
+    
+    // Minimap view
+    renderer.setViewport(10, 10, 200, 200);
+    renderer.setScissor(10, 10, 200, 200);
+    renderer.setScissorTest(true);
+    renderer.render(scene, miniCam);
+    renderer.setScissorTest(false);
   }
 
   animate();
