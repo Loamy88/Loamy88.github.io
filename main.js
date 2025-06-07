@@ -30,8 +30,8 @@ scene.add(trailGroup);
 
 // Generate city grid
 const city = generateCityGrid({
-  gridSize: 16,
-  cellSize: 40,
+  gridSize: 10,
+  cellSize: 25,
   roadWidth: 6,
   fieldChance: 0.12,
   missingRoadChance: 0.18,
