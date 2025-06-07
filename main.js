@@ -48,43 +48,55 @@ basePlane.rotation.x = -Math.PI / 2;
 basePlane.position.y = -1; // slightly below y=0
 scene.add(basePlane);
 
-// Cockpit
-const cockpit = createCockpit();
-camera.add(cockpit);
-camera.position.set(-32, 1.5, -32);
-scene.add(camera);
+// ... (scene, lighting, city, base plane setup as before)
 
-// UI
-createOverlay();
-const speedometer = createSpeedometer();
+const loader = new THREE.GLTFLoader();
+loader.load('assets/car.glb', function(gltf) {
+  const car = gltf.scene;
+  // Set initial car position (adjust as needed)
+  car.position.set(-32, 0, -32);
+  car.rotation.y = Math.PI; // adjust if your model faces the wrong way
+  scene.add(car);
 
-// Controls
-const controls = new CarControls(camera, cockpit, speedometer, trailGroup);
+  // Add only the steering wheel (no dashboard)
+  const cockpit = createCockpit();
+  // Adjust the wheel's position to fit your model!
+  cockpit.position.set(0, 1.2, 1.2);
+  car.add(cockpit);
 
-function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
+  // Camera: just outside/in front window (adjust as needed)
+  camera.position.set(0, 1.4, 2.2);
+  car.add(camera);
 
-  // Trail drawing (reuse your logic here as needed)
-  // ...
+  // UI
+  createOverlay();
+  const speedometer = createSpeedometer();
 
-  // Minimap update
-  miniCam.position.set(camera.position.x, 100, camera.position.z);
-  miniCam.lookAt(camera.position.x, 0, camera.position.z);
+  // Controls - pass car, cockpit, camera, speedometer, trailGroup
+  const controls = new CarControls(car, cockpit, camera, speedometer, trailGroup);
 
-  renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-  renderer.render(scene, camera);
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
 
-  renderer.setViewport(10, 10, 200, 200);
-  renderer.setScissor(10, 10, 200, 200);
-  renderer.setScissorTest(true);
-  renderer.render(scene, miniCam);
-  renderer.setScissorTest(false);
-}
-animate();
+    // Minimap follows car, not camera!
+    miniCam.position.set(car.position.x, 100, car.position.z);
+    miniCam.lookAt(car.position.x, 0, car.position.z);
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+    renderer.render(scene, camera);
+
+    renderer.setViewport(10, 10, 200, 200);
+    renderer.setScissor(10, 10, 200, 200);
+    renderer.setScissorTest(true);
+    renderer.render(scene, miniCam);
+    renderer.setScissorTest(false);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
 });
