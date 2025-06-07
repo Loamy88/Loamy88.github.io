@@ -30,9 +30,9 @@ scene.add(trailGroup);
 
 // Generate city grid
 const city = generateCityGrid({
-  gridSize: 10,
+  gridSize: 8,
   cellSize: 25,
-  roadWidth: 8,
+  roadWidth: 10,
   fieldChance: 0.12,
   missingRoadChance: 0.18,
   startBlock: new THREE.Vector2(0, 0)
