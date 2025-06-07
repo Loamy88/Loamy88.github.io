@@ -22,9 +22,9 @@ function randomGreen() {
  * @returns {THREE.Group} City group
  */
 function generateCityGrid({
-  gridSize = 8,
+  gridSize = 6,
   cellSize = 25,
-  roadWidth = 10,
+  roadWidth = 12,
   fieldChance = 0.12,
   missingRoadChance = 0.18,
   startBlock = new THREE.Vector2(0, 0),
