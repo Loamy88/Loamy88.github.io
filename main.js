@@ -1,3 +1,5 @@
+import { OBJLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/OBJLoader.js';
+
 // Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xa0c4ff);
