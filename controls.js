@@ -1,3 +1,4 @@
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 // controls.js - Handles keyboard input and car movement logic for a GLB car model (and steering wheel/camera)
 // Assumes your main.js loads the car model, creates the camera, and attaches both cockpit (wheel only) and camera to the car.
 
@@ -5,7 +6,7 @@
 // const controls = new CarControls(car, cockpit, camera, speedometer, trailGroup);
 // controls.update() should be called in the animation loop.
 
-class CarControls {
+export class CarControls {
   /**
    * @param {THREE.Object3D} car - The loaded car.glb model (parent for camera and cockpit)
    * @param {THREE.Object3D} cockpit - The steering wheel group (child of car)
