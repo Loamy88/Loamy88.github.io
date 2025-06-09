@@ -1,3 +1,4 @@
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 // citygen.js - City Grid Environment Generator for Three.js
 
 function randomGray() {
@@ -21,7 +22,7 @@ function randomGreen() {
  * @param {THREE.Vector2} [options.startBlock] - Block where car starts (road guaranteed)
  * @returns {THREE.Group} City group
  */
-function generateCityGrid({
+export function generateCityGrid({
   gridSize = 6,
   cellSize = 25,
   roadWidth = 12,
