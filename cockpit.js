@@ -1,5 +1,6 @@
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 // Build steering wheel only (for use inside GLB car model)
-function createCockpit() {
+export function createCockpit() {
   const cockpit = new THREE.Group();
 
   // Steering wheel
