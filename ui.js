@@ -1,5 +1,5 @@
 // UI overlay and speedometer
-function createOverlay() {
+export function createOverlay() {
   const overlay = document.createElement('div');
   overlay.id = 'overlay';
   overlay.innerHTML = `
@@ -9,7 +9,7 @@ function createOverlay() {
   document.body.appendChild(overlay);
 }
 
-function createSpeedometer() {
+export function createSpeedometer() {
   const speedometer = document.createElement('div');
   speedometer.id = 'speedometer';
   document.body.appendChild(speedometer);
